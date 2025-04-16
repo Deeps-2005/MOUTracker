@@ -41,7 +41,7 @@ MOUTracker/
 ### 1. Clone the repository
 
 ```bash
-https://github.com/Deeps-2005/MOUTracker.git
+git clone https://github.com/Deeps-2005/MOUTracker.git
 cd MOUTracker
 ```
 
@@ -106,6 +106,8 @@ npm start                 # Runs frontend on http://localhost:3000
 ![alt text](image-1.png)
 ![alt text](image-2.png)
 ![alt text](image-3.png)
+![image](https://github.com/user-attachments/assets/35719285-d766-419c-a5ba-bf65cd1de20b)
+
 
 ---
 
