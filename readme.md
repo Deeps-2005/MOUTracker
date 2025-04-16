@@ -41,7 +41,7 @@ MOUTracker/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/MOUTracker.git
+https://github.com/Deeps-2005/MOUTracker.git
 cd MOUTracker
 ```
 
