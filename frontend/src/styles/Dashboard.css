@@ -1,0 +1,38 @@
+/* Dashboard.css */
+
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #2c3e50;
+  }
+  
+  div {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+  }
+  
+  button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    margin: 10px 0;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .dashboard-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .dashboard-title {
+    text-align: center;
+    color: #34495e;
+  }
+  
