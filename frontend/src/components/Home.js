@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import NotificationPanel from './NotificationPanel';
+import { auth } from '../utils/api';
 import '../styles/Home.css';
 import '../styles/Sidebar.css';
 import { useNavigate } from 'react-router-dom';
@@ -19,9 +20,13 @@ function Home() {
   const goToAdd = () => navigate('/add');
   const goToSearch = () => navigate('/search');
   const logout = () => {
-    // You can clear sessionStorage/localStorage if used
+    // Clear authentication data
+    auth.removeToken();
     navigate('/');
   };
+
+  // Get current user info
+  const user = auth.getUser();
 
   return (
     <>
@@ -45,6 +50,7 @@ function Home() {
 
         <main className="main-content">
           <h2>Welcome to MOU Tracker</h2>
+          {user && <p style={{ color: '#666', marginBottom: '20px' }}>Logged in as: {user.email}</p>}
           <div className="home-buttons">
             <button onClick={goToAdd}>➕ Add MOU</button>
             <button onClick={goToSearch}>🔍 Search and Edit MOU</button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { mouAPI } from '../utils/api';
 import * as XLSX from 'xlsx';
 import Navbar from './Navbar';
 import '../styles/FilterDownload.css';
@@ -7,12 +7,29 @@ import '../styles/FilterDownload.css';
 function FilterDownload() {
   const [filters, setFilters] = useState({});
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = e => setFilters({ ...filters, [e.target.name]: e.target.value });
+  const handleChange = e => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setError('');
+  };
 
   const handleSearch = async () => {
-    const res = await axios.get('http://localhost:5000/api/mou/filter', { params: filters });
-    setResults(res.data);
+    setLoading(true);
+    setError('');
+    try {
+      const data = await mouAPI.filter(filters);
+      setResults(data);
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.error || 'Failed to search MOUs');
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExportExcel = () => {
@@ -29,12 +46,25 @@ function FilterDownload() {
     window.location.href = `/edit/${index}`;
   };
   
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     if (window.confirm('Are you sure you want to delete this record?')) {
-      const updated = [...results];
-      updated.splice(index, 1);
-      setResults(updated);
-      axios.post('http://localhost:5000/api/mou/overwrite', updated); // you'll need this route in backend
+      setLoading(true);
+      setError('');
+      try {
+        const updated = [...results];
+        updated.splice(index, 1);
+        await mouAPI.overwrite(updated);
+        setResults(updated);
+        alert('Record deleted successfully!');
+      } catch (error) {
+        if (error.response && error.response.data) {
+          setError(error.response.data.error || 'Failed to delete record');
+        } else {
+          setError('Network error. Please try again.');
+        }
+      } finally {
+        setLoading(false);
+      }
     }
   };
   
@@ -43,12 +73,15 @@ function FilterDownload() {
       <Navbar />
       <div className="filter-container">
         <h3>Filter , Edit, Manage & Export MOU Data</h3>
+        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
         <div className="filter-inputs">
-          <input name="academicYear" placeholder="Academic Year" onChange={handleChange} />
-          <input name="facultyName" placeholder="Faculty Name" onChange={handleChange} />
-          <input name="duration" placeholder="Duration" onChange={handleChange} />
-          <input name="institute" placeholder="Institute" onChange={handleChange} />
-          <button onClick={handleSearch}>Search</button>
+          <input name="academicYear" placeholder="Academic Year" onChange={handleChange} disabled={loading} />
+          <input name="facultyName" placeholder="Faculty Name" onChange={handleChange} disabled={loading} />
+          <input name="duration" placeholder="Duration" onChange={handleChange} disabled={loading} />
+          <input name="institute" placeholder="Institute" onChange={handleChange} disabled={loading} />
+          <button onClick={handleSearch} disabled={loading}>
+            {loading ? 'Searching...' : 'Search'}
+          </button>
           {results.length > 0 && (
             <button onClick={handleExportExcel} className="excel-button">Export to Excel</button>
           )}
@@ -82,8 +115,8 @@ function FilterDownload() {
                 <td>{row.Purpose}</td>
                 <td>{row.Outcomes}</td>
                 <td className="action-buttons">
-                <button onClick={() => handleEdit(index)} className="edit-btn">✏️</button>
-                <button onClick={() => handleDelete(index)} className="delete-btn">🗑</button>
+                <button onClick={() => handleEdit(index)} className="edit-btn" disabled={loading}>✏️</button>
+                <button onClick={() => handleDelete(index)} className="delete-btn" disabled={loading}>🗑</button>
                 </td>
                 </tr>
                 ))}

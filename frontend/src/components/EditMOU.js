@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import { mouAPI } from '../utils/api';
 import Navbar from './Navbar';
 
 function EditMOU() {
   const { index } = useParams();
   const navigate = useNavigate();
   const [mou, setMou] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const data = localStorage.getItem('editData');
@@ -15,15 +17,31 @@ function EditMOU() {
     }
   }, []);
 
-  const handleChange = e => setMou({ ...mou, [e.target.name]: e.target.value });
+  const handleChange = e => {
+    setMou({ ...mou, [e.target.name]: e.target.value });
+    setError('');
+  };
 
   const handleUpdate = async e => {
     e.preventDefault();
-    const all = await axios.get('http://localhost:5000/api/mou/filter');
-    all.data[index] = mou;
-    await axios.post('http://localhost:5000/api/mou/overwrite', all.data);
-    alert('MOU updated!');
-    navigate('/search');
+    setLoading(true);
+    setError('');
+    
+    try {
+      const all = await mouAPI.filter({});
+      all[index] = mou;
+      await mouAPI.overwrite(all);
+      alert('MOU updated successfully!');
+      navigate('/search');
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.error || 'Failed to update MOU');
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +49,7 @@ function EditMOU() {
       <Navbar />
       <div className="dashboard-container">
         <h2>Edit MOU</h2>
+        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
         <form className="mou-form" onSubmit={handleUpdate}>
           {Object.keys(mou).map(key => (
             <input
@@ -40,9 +59,12 @@ function EditMOU() {
               value={mou[key]}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           ))}
-          <button type="submit">Update</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Updating...' : 'Update'}
+          </button>
         </form>
       </div>
     </div>

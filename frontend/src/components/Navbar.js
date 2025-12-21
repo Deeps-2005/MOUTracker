@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { auth } from '../utils/api';
 import '../styles/Navbar.css';
 
 function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    auth.removeToken();
     navigate('/');
   };
 
