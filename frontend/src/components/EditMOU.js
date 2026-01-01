@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mouAPI } from '../utils/api';
+import { useToast } from './ToastContainer';
+import LoadingSpinner from './LoadingSpinner';
 import Navbar from './Navbar';
 import '../styles/MOUForm.css';
 
 function EditMOU() {
-  const { id } = useParams(); // Changed from index to id
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [mou, setMou] = useState({
     mouId: '',
     institute: '',
@@ -25,9 +28,9 @@ function EditMOU() {
     status: 'active',
     SignedDoc: null
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchMOU();
@@ -61,7 +64,7 @@ function EditMOU() {
       
       setMou(formattedMou);
     } catch (error) {
-      setError('Failed to fetch MOU details');
+      showToast('Failed to fetch MOU details', 'error');
       console.error(error);
     } finally {
       setLoading(false);
@@ -70,6 +73,21 @@ function EditMOU() {
 
   const handleChange = e => {
     const { name, value, files } = e.target;
+    
+    // Clear field error on change
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    
+    // Validate email
+    if (name === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setFieldErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+    }
+    
+    // Validate phone
+    if (name === 'phone' && value && !/^[0-9+\-\s()]*$/.test(value)) {
+      setFieldErrors(prev => ({ ...prev, phone: 'Invalid phone format' }));
+    }
     
     // Auto-calculate expiry date when start date or duration changes
     if (name === 'startDate' || name === 'duration') {
@@ -86,15 +104,12 @@ function EditMOU() {
     } else {
       setMou({ ...mou, [name]: files ? files[0] : value });
     }
-    setError('');
-    setSuccess('');
   };
 
   const handleUpdate = async e => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
+    setSubmitting(true);
+    setFieldErrors({});
     
     const formData = new FormData();
     
@@ -121,18 +136,18 @@ function EditMOU() {
     
     try {
       await mouAPI.update(id, formData);
-      setSuccess('MOU updated successfully!');
+      showToast('MOU updated successfully!', 'success');
       setTimeout(() => {
         navigate('/search');
       }, 1500);
     } catch (error) {
       if (error.response && error.response.data) {
-        setError(error.response.data.error || 'Failed to update MOU');
+        showToast(error.response.data.error || 'Failed to update MOU', 'error');
       } else {
-        setError('Network error. Please try again.');
+        showToast('Network error. Please try again.', 'error');
       }
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -154,26 +169,24 @@ function EditMOU() {
     status: 'Status'
   };
 
-  if (loading && !mou.mouId) {
+  if (loading) {
     return (
-      <div>
+      <>
         <Navbar />
-        <div className="dashboard-container">
-          <p>Loading MOU details...</p>
-        </div>
-      </div>
+        <LoadingSpinner size="large" message="Loading MOU details..." />
+      </>
     );
   }
 
   return (
-    <div>
+    <>
       <Navbar />
-      <div className="dashboard-container">
-        <h2>Edit MOU</h2>
-        {error && <div style={{ color: 'red', marginBottom: '10px', padding: '10px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
-        {success && <div style={{ color: 'green', marginBottom: '10px', padding: '10px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>{success}</div>}
-        
+      {submitting ? (
+        <LoadingSpinner size="large" message="Updating MOU..." />
+      ) : (
         <form className="mou-form" onSubmit={handleUpdate}>
+          <h2>Edit MOU</h2>
+          
           {Object.entries(mou).filter(([key]) => key !== 'SignedDoc' && key !== 'id').map(([key, val]) => {
             if (key === 'status') {
               return (
@@ -183,14 +196,16 @@ function EditMOU() {
                     name={key}
                     value={mou[key]}
                     onChange={handleChange}
-                    disabled={loading}
-                    style={{ padding: '10px', fontSize: '16px', border: '1px solid #ccc', borderRadius: '6px' }}
+                    disabled={submitting}
+                    className={fieldErrors[key] ? 'error' : ''}
+                    style={{ padding: '10px', fontSize: '16px', border: '1px solid var(--border, #ccc)', borderRadius: 'var(--radius-md, 6px)' }}
                   >
                     <option value="active">Active</option>
                     <option value="expired">Expired</option>
                     <option value="renewed">Renewed</option>
                     <option value="terminated">Terminated</option>
                   </select>
+                  {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
                 </div>
               );
             } else if (key === 'startDate' || key === 'expiryDate') {
@@ -203,9 +218,11 @@ function EditMOU() {
                     value={mou[key]}
                     onChange={handleChange}
                     required={key === 'startDate'}
-                    disabled={loading || key === 'expiryDate'}
+                    disabled={submitting || key === 'expiryDate'}
                     readOnly={key === 'expiryDate'}
+                    className={fieldErrors[key] ? 'error' : ''}
                   />
+                  {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
                 </div>
               );
             } else if (key === 'purpose' || key === 'expectedOutcome' || key === 'address') {
@@ -218,23 +235,11 @@ function EditMOU() {
                     value={mou[key]}
                     onChange={handleChange}
                     required={key === 'purpose'}
-                    disabled={loading}
+                    disabled={submitting}
                     rows="3"
+                    className={fieldErrors[key] ? 'error' : ''}
                   />
-                </div>
-              );
-            } else if (key === 'mouId') {
-              return (
-                <div key={key}>
-                  <label>{fieldLabels[key]}</label>
-                  <input
-                    name={key}
-                    type="text"
-                    value={mou[key]}
-                    disabled
-                    readOnly
-                    style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
-                  />
+                  {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
                 </div>
               );
             } else {
@@ -248,9 +253,13 @@ function EditMOU() {
                     value={mou[key]}
                     onChange={handleChange}
                     required={!['department', 'expectedOutcome'].includes(key)}
-                    disabled={loading}
+                    disabled={submitting || key === 'mouId'}
+                    readOnly={key === 'mouId'}
                     min={key === 'duration' ? '1' : undefined}
+                    className={fieldErrors[key] ? 'error' : ''}
+                    style={key === 'mouId' ? { backgroundColor: '#f0f0f0', cursor: 'not-allowed' } : {}}
                   />
+                  {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
                 </div>
               );
             }
@@ -263,27 +272,16 @@ function EditMOU() {
               type="file"
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
               onChange={handleChange}
-              disabled={loading}
+              disabled={submitting}
             />
-            <small style={{ color: '#666', fontSize: '12px' }}>Leave empty to keep existing document</small>
           </div>
           
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="submit" disabled={loading} style={{ flex: 1 }}>
-              {loading ? 'Updating...' : 'Update MOU'}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => navigate('/search')} 
-              disabled={loading}
-              style={{ flex: 1, backgroundColor: '#95a5a6' }}
-            >
-              Cancel
-            </button>
-          </div>
+          <button type="submit" disabled={submitting || Object.keys(fieldErrors).some(k => fieldErrors[k])}>
+            Update MOU
+          </button>
         </form>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
 

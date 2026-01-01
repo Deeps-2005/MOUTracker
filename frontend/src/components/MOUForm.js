@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { mouAPI } from '../utils/api';
+import { useToast } from './ToastContainer';
+import LoadingSpinner from './LoadingSpinner';
 import '../styles/MOUForm.css';
 import Navbar from './Navbar';
 
 function MOUForm() {
+  const { showToast } = useToast();
   const [mou, setMou] = useState({
     mouId: '',
     institute: '',
@@ -21,12 +24,26 @@ function MOUForm() {
     expectedOutcome: '',
     SignedDoc: null // for file input
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleChange = e => {
     const { name, value, files } = e.target;
+    
+    // Clear field error on change
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    
+    // Validate email
+    if (name === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setFieldErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+    }
+    
+    // Validate phone
+    if (name === 'phone' && value && !/^[0-9+\-\s()]*$/.test(value)) {
+      setFieldErrors(prev => ({ ...prev, phone: 'Invalid phone format' }));
+    }
     
     // Auto-calculate expiry date when start date or duration changes
     if (name === 'startDate' || name === 'duration') {
@@ -43,15 +60,12 @@ function MOUForm() {
     } else {
       setMou({ ...mou, [name]: files ? files[0] : value });
     }
-    setError('');
-    setSuccess('');
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setFieldErrors({});
     
     const formData = new FormData();
 
@@ -73,7 +87,7 @@ function MOUForm() {
     
     try {
       await mouAPI.add(formData);
-      setSuccess('MOU added successfully!');
+      showToast('MOU added successfully!', 'success');
       // Reset form
       setMou({
         mouId: '',
@@ -96,9 +110,9 @@ function MOUForm() {
       e.target.reset();
     } catch (error) {
       if (error.response && error.response.data) {
-        setError(error.response.data.error || error.response.data.message || 'Error adding MOU');
+        showToast(error.response.data.error || error.response.data.message || 'Error adding MOU', 'error');
       } else {
-        setError('Network error. Please try again.');
+        showToast('Network error. Please try again.', 'error');
       }
     } finally {
       setLoading(false);
@@ -125,40 +139,44 @@ function MOUForm() {
   return (
     <>
       <Navbar />
-      <form className="mou-form" onSubmit={handleSubmit}>
-        <h2>Add New MOU</h2>
-        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-        {success && <div style={{ color: 'green', marginBottom: '10px' }}>{success}</div>}
-        
-        {Object.entries(mou).map(([key, val]) => {
-          if (key === 'SignedDoc') {
-            return (
-              <div key={key}>
-                <label>Signed Document (PDF, DOC, DOCX, JPG, PNG)</label>
-                <input
-                  name="SignedDoc"
-                  type="file"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  onChange={handleChange}
-                  disabled={loading}
-                />
-              </div>
-            );
-          } else if (key === 'startDate' || key === 'expiryDate') {
-            return (
-              <div key={key}>
-                <label>{fieldLabels[key]}</label>
-                <input
-                  name={key}
-                  type="date"
-                  value={mou[key]}
-                  onChange={handleChange}
-                  required={key === 'startDate'}
-                  disabled={loading || key === 'expiryDate'}
-                  readOnly={key === 'expiryDate'}
-                />
-              </div>
-            );
+      {loading ? (
+        <LoadingSpinner size="large" message="Submitting MOU..." />
+      ) : (
+        <form className="mou-form" onSubmit={handleSubmit}>
+          <h2>Add New MOU</h2>
+          
+          {Object.entries(mou).map(([key, val]) => {
+            if (key === 'SignedDoc') {
+              return (
+                <div key={key}>
+                  <label>Signed Document (PDF, DOC, DOCX, JPG, PNG)</label>
+                  <input
+                    name="SignedDoc"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                  {fieldErrors.SignedDoc && <span className="field-error">{fieldErrors.SignedDoc}</span>}
+                </div>
+              );
+            } else if (key === 'startDate' || key === 'expiryDate') {
+              return (
+                <div key={key}>
+                  <label>{fieldLabels[key]}</label>
+                  <input
+                    name={key}
+                    type="date"
+                    value={mou[key]}
+                    onChange={handleChange}
+                    required={key === 'startDate'}
+                    disabled={loading || key === 'expiryDate'}
+                    readOnly={key === 'expiryDate'}
+                    className={fieldErrors[key] ? 'error' : ''}
+                  />
+                  {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
+                </div>
+              );
           } else if (key === 'purpose' || key === 'expectedOutcome' || key === 'address') {
             return (
               <div key={key}>
@@ -171,7 +189,9 @@ function MOUForm() {
                   required={key === 'purpose'}
                   disabled={loading}
                   rows="3"
+                  className={fieldErrors[key] ? 'error' : ''}
                 />
+                {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
               </div>
             );
           } else {
@@ -187,16 +207,19 @@ function MOUForm() {
                   required={!['mouId', 'department', 'expectedOutcome'].includes(key)}
                   disabled={loading}
                   min={key === 'duration' ? '1' : undefined}
+                  className={fieldErrors[key] ? 'error' : ''}
                 />
+                {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
               </div>
             );
           }
         })}
         
-        <button type="submit" disabled={loading}>
-          {loading ? 'Submitting...' : 'Submit'}
+        <button type="submit" disabled={loading || Object.keys(fieldErrors).some(k => fieldErrors[k])}>
+          Submit
         </button>
       </form>
+      )}
     </>
   );
 }

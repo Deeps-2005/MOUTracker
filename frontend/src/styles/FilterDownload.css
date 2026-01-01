@@ -1,6 +1,8 @@
 .filter-container {
-    padding: 40px;
+    padding: 40px 20px;
     font-family: 'Segoe UI', sans-serif;
+    max-width: 1400px;
+    margin: 0 auto;
   }
   
   .filter-inputs {
@@ -10,99 +12,197 @@
     flex-wrap: wrap;
   }
   
-  .filter-inputs input {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+  .filter-inputs input,
+  .filter-inputs select {
+    padding: 10px 12px;
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid var(--border, #e2e8f0);
     font-size: 14px;
+    flex: 1;
+    min-width: 150px;
+    transition: var(--transition);
+  }
+
+  .filter-inputs input:focus,
+  .filter-inputs select:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
   
   button {
-    padding: 8px 14px;
-    background-color: #007bff;
+    padding: 10px 16px;
+    background-color: var(--primary-color, #2563eb);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md, 8px);
     cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
   }
   
-  button:hover {
-    background-color: #0056b3;
+  button:hover:not(:disabled) {
+    background-color: var(--primary-hover, #1d4ed8);
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
   
   .table-container {
     overflow-x: auto;
+    background: var(--surface, #ffffff);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-md);
   }
   
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 0;
   }
   
   th,
   td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    text-align: left;
     font-size: 14px;
   }
   
   th {
-    background-color: #f0f0f0;
+    background-color: var(--background, #f8fafc);
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  tbody tr {
+    transition: var(--transition);
+  }
+
+  tbody tr:hover {
+    background-color: var(--primary-light, #dbeafe);
   }
   
   .excel-button {
-    background-color: #28a745;
+    background-color: var(--success-color, #10b981);
     color: white;
     border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md, 8px);
     cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
   }
   
   .excel-button:hover {
-    background-color: #218838;
+    background-color: #059669;
+    transform: translateY(-1px);
   }
 
   .result-row {
     position: relative;
   }
   
-  .result-row:hover .action-buttons {
-    visibility: visible;
-  }
-  
   .action-buttons {
-    visibility: hidden;
     display: flex;
     gap: 6px;
     justify-content: center;
   }
   
   .edit-btn, .delete-btn {
-    padding: 4px 8px;
+    padding: 6px 10px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 6px);
     font-size: 14px;
     cursor: pointer;
+    transition: var(--transition);
   }
   
   .edit-btn {
-    background-color: #ffc107;
+    background-color: var(--warning-color, #f59e0b);
+    color: white;
   }
   
   .edit-btn:hover {
-    background-color: #e0a800;
+    background-color: #d97706;
+    transform: scale(1.05);
   }
   
   .delete-btn {
-    background-color: #dc3545;
+    background-color: var(--error-color, #ef4444);
     color: white;
   }
   
   .delete-btn:hover {
-    background-color: #c82333;
+    background-color: #dc2626;
+    transform: scale(1.05);
+  }
+
+  /* Mobile Responsive Design */
+  @media (max-width: 768px) {
+    .filter-container {
+      padding: 20px 10px;
+    }
+
+    .filter-inputs {
+      flex-direction: column;
+    }
+
+    .filter-inputs input,
+    .filter-inputs select {
+      width: 100%;
+      min-width: 100%;
+    }
+
+    /* Hide table and show card layout on mobile */
+    .table-container {
+      border-radius: 0;
+    }
+
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+
+    thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+
+    tr {
+      margin-bottom: 15px;
+      border: 1px solid var(--border, #e2e8f0);
+      border-radius: var(--radius-md, 8px);
+      background: var(--surface, #ffffff);
+      padding: 10px;
+    }
+
+    td {
+      border: none;
+      position: relative;
+      padding-left: 50%;
+      text-align: right;
+    }
+
+    td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      font-weight: 600;
+      color: var(--text-secondary, #64748b);
+      text-align: left;
+    }
+
+    .action-buttons {
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
   }
   
   

@@ -28,12 +28,12 @@ button:hover {
 
 .dashboard-container {
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: var(--background, #f9f9f9);
 }
 
 .dashboard-title {
   text-align: center;
-  color: #34495e;
+  color: var(--text-primary, #34495e);
 }
 
 /* Statistics Cards */
@@ -49,24 +49,24 @@ button:hover {
 }
 
 .stat-card {
-  background: white;
-  border-radius: 8px;
+  background: var(--surface, white);
+  border-radius: var(--radius-lg, 8px);
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border-left: 4px solid #007bff;
+  transition: var(--transition);
+  border-left: 4px solid var(--primary-color, #2563eb);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .stat-card h3 {
   margin: 0 0 10px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary, #666);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -74,31 +74,31 @@ button:hover {
 .stat-number {
   font-size: 32px;
   font-weight: bold;
-  color: #2c3e50;
+  color: var(--text-primary, #2c3e50);
   margin: 0;
 }
 
 .stat-card.active {
-  border-left-color: #4CAF50;
+  border-left-color: var(--status-active, #10b981);
 }
 
 .stat-card.active .stat-number {
-  color: #4CAF50;
+  color: var(--status-active, #10b981);
 }
 
 .stat-card.expired {
-  border-left-color: #f44336;
+  border-left-color: var(--status-expired, #ef4444);
 }
 
 .stat-card.expired .stat-number {
-  color: #f44336;
+  color: var(--status-expired, #ef4444);
 }
 
 .stat-card.expiring {
-  border-left-color: #ff9800;
+  border-left-color: var(--status-expiring, #f59e0b);
 }
 
 .stat-card.expiring .stat-number {
-  color: #ff9800;
+  color: var(--status-expiring, #f59e0b);
 }
   
