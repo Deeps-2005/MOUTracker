@@ -1,38 +1,104 @@
 /* Dashboard.css */
 
 h1 {
-    text-align: center;
-    margin-top: 20px;
-    color: #2c3e50;
-  }
-  
-  div {
-    padding: 20px;
-    max-width: 900px;
-    margin: auto;
-  }
-  
-  button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 4px;
-    margin: 10px 0;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  .dashboard-container {
-    padding: 20px;
-    background-color: #f9f9f9;
-  }
-  
-  .dashboard-title {
-    text-align: center;
-    color: #34495e;
-  }
+  text-align: center;
+  margin-top: 20px;
+  color: #2c3e50;
+}
+
+div {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.dashboard-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.dashboard-title {
+  text-align: center;
+  color: #34495e;
+}
+
+/* Statistics Cards */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+  padding: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #007bff;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.stat-card.active {
+  border-left-color: #4CAF50;
+}
+
+.stat-card.active .stat-number {
+  color: #4CAF50;
+}
+
+.stat-card.expired {
+  border-left-color: #f44336;
+}
+
+.stat-card.expired .stat-number {
+  color: #f44336;
+}
+
+.stat-card.expiring {
+  border-left-color: #ff9800;
+}
+
+.stat-card.expiring .stat-number {
+  color: #ff9800;
+}
   

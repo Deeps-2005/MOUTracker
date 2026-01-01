@@ -1,35 +1,82 @@
 /* MOUForm.css */
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-width: 600px;
-    margin: 30px auto;
-    background-color: #fdfdfd;
-    padding: 24px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  input {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-  
-  button {
-    background-color: #2e86de;
-    color: white;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #1b4f72;
-  }
+.mou-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 800px;
+  margin: 30px auto;
+  background-color: #fdfdfd;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mou-form h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.mou-form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  margin: 0;
+}
+
+.mou-form label {
+  font-weight: 600;
+  color: #34495e;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.mou-form input,
+.mou-form textarea {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.mou-form input:focus,
+.mou-form textarea:focus {
+  outline: none;
+  border-color: #2e86de;
+  box-shadow: 0 0 0 2px rgba(46, 134, 222, 0.1);
+}
+
+.mou-form input[readonly] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.mou-form textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.mou-form button {
+  background-color: #2e86de;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.mou-form button:hover:not(:disabled) {
+  background-color: #1b4f72;
+}
+
+.mou-form button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
   

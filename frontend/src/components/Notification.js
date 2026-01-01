@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { mouAPI } from '../utils/api';
 
 function Notification() {
-  const [mous, setMous] = useState([]);
+  const [expiringMous, setExpiringMous] = useState([]);
 
   useEffect(() => {
     const today = new Date();
@@ -11,38 +11,30 @@ function Notification() {
     // Show reminder only on the 1st of every month
     if (currentDay === 1) {
       alert("🔔 Monthly Reminder: Please enter MOU activities for this month!");
-
-      // Fetch MOU data to check for renewals or new entries
-      axios.get('http://localhost:5000/api/mou/filter')
-        .then(response => {
-          setMous(response.data);
-          handleNotifications(response.data);
-        })
-        .catch(() => {
-          console.error("Failed to fetch MOU data");
-        });
     }
+
+    // Fetch expiring MOUs (next 60 days)
+    fetchExpiringMous();
   }, []);
 
+  const fetchExpiringMous = async () => {
+    try {
+      const data = await mouAPI.getExpiring(60); // MOUs expiring in next 60 days
+      setExpiringMous(data);
+      handleNotifications(data);
+    } catch (error) {
+      console.error("Failed to fetch expiring MOUs:", error);
+    }
+  };
+
   const handleNotifications = (data) => {
-    const now = new Date();
-
-    data.forEach(mou => {
-      const durationYears = parseInt(mou.Duration); // assumes Duration is like '1', '2'
-      const startYear = parseInt(mou.AcademicYear.split('-')[0]);
-      const endYear = startYear + durationYears;
-      const endDate = new Date(endYear, 4); // MOU expiry assumed in May
-
-      // Check for MOU renewal reminders
-      const timeToExpire = (endDate - now) / (1000 * 60 * 60 * 24); // days left
-
-      if (timeToExpire <= 60 && timeToExpire > 0) {
-        alert(`⏳ Reminder: MOU with ${mou.Institute} is expiring soon. Consider renewal.`);
-      }
-
-      // Optionally, alert for new MOU based on creation date logic
-      // Or show alert if activity logs are missing (if you track that)
-    });
+    if (data.length > 0) {
+      const mouList = data.map(mou => 
+        `• ${mou.institute} (Expires: ${new Date(mou.expiry_date).toLocaleDateString()}, ${mou.days_remaining} days left)`
+      ).join('\n');
+      
+      alert(`⏳ ${data.length} MOU(s) expiring soon:\n\n${mouList}\n\nConsider renewal actions.`);
+    }
   };
 
   return null;
