@@ -1,1 +1,10 @@
-[{"email":"deepakm11b108@gmail.com","password":"123456"}]
+[
+  {
+    "email": "deepakm11b108@gmail.com",
+    "password": "$2b$10$.aCIMpUd3ZEaWxpY6iiJrOcYxx/7g3Vp9H4EjJDMjC82NJuzcLKUG"
+  },
+  {
+    "email": "deepakmathavan77@gmail.com",
+    "password": "$2b$10$79/2/oc2z80Qv8GA4S/u9udnDSqMcI9Ijgme.jiCY.a8SajZB08xK"
+  }
+]
